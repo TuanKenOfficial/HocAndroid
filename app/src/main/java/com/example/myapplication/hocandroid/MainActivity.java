@@ -1,14 +1,21 @@
-package com.example.myapplication;
+package com.example.myapplication.hocandroid;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.example.myapplication.model.Contact;
+import com.example.myapplication.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,9 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG="SQL";
 //    String DATABASE_NAME = "dbSinhvien.sqlite";
 //    String DATABASE_NAME = "dbMusic.sqlite";
-    String DATABASE_NAME = "dbContact.sqlite";
+   public static String DATABASE_NAME = "dbContact.sqlite";
     String DB_PATH_SUFFIX="/databases/";
-    SQLiteDatabase database = null;
+   public static SQLiteDatabase database = null;
     ListView lvContact;
 //    ArrayAdapter<Music> contactArrayAdapter;
 //    ArrayAdapter<SinhVien> contactArrayAdapter;
@@ -32,17 +39,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         processCopy();
         addControl();
-        hienthiSanPham();
+//        hienthiSanPham(); đóng lại do dùng onResum bên dưới rồi
     }
     private void hienthiSanPham() {
         database = openOrCreateDatabase(DATABASE_NAME,MODE_PRIVATE,null);
         //theo kieu rawQuery
 //        Cursor cursor = database.rawQuery("select * from SinhVien",null);
 //        Cursor cursor = database.rawQuery("select * from Music",null);
-//        Cursor cursor = database.rawQuery("select * from Contact",null);
+        Cursor cursor = database.rawQuery("select * from Contact",null);
 
         //theo kieu query lay theo ma >= 2
-        Cursor cursor = database.query("Contact",null,"Ma>=?",new String[]{"2"},null,null,null);
+//        Cursor cursor = database.query("Contact",null,"Ma>=?",new String[]{"2"},null,null,null);
         contactArrayAdapter.clear();
         while (cursor.moveToNext()){
             int ma = cursor.getInt(0);
@@ -109,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
            * Vậy là kết thúc quy trình
            * Nhớ kiểm tra lớp Model coi có đúng với bảng sqlite đã tạo*/
             if(f.exists()){
-                Toast.makeText(this, "File tồn tại đưa dữ liệu vào", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Dữ liệu đã được đưa vào bảng", Toast.LENGTH_LONG).show();
                 Log.d(TAG, "copyDatabaseFromAsset: Load file lên");
                 f.mkdir();
                 OutputStream myOutPut = new FileOutputStream(outFileName);
@@ -123,8 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 myInput.close();
             }
             else if (!f.exists()){
-                Toast.makeText(this, "File không tồn tại", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "copyDatabaseFromAsset: Load file lên");
+                Log.d(TAG, "copyDatabaseFromAsset: File đã tồn tại");
                 f.mkdir();
                 OutputStream myOutPut = new FileOutputStream(outFileName);
                 byte []buffer= new byte[1024];
@@ -142,5 +148,31 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Lỗi: "+e, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "copyDatabaseFromAsset: ", e);
         }
+    }
+    //menu
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(TAG, "onCreateOptionsMenu: ");
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menuThem){
+            Log.d(TAG, "onOptionsItemSelected: ");
+            Intent intentThem = new Intent(MainActivity.this,ThemSQLiteActivity.class);
+            startActivity(intentThem);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    //tải lại danh sách dùng onResum
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hienthiSanPham();
     }
 }
