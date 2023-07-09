@@ -36,10 +36,13 @@ public class MainActivity extends AppCompatActivity {
     }
     private void hienthiSanPham() {
         database = openOrCreateDatabase(DATABASE_NAME,MODE_PRIVATE,null);
+        //theo kieu rawQuery
 //        Cursor cursor = database.rawQuery("select * from SinhVien",null);
 //        Cursor cursor = database.rawQuery("select * from Music",null);
-        Cursor cursor = database.rawQuery("select * from Contact",null);
-//        Cursor cursor = database.query("Contact",null,null,null,null,null,null);
+//        Cursor cursor = database.rawQuery("select * from Contact",null);
+
+        //theo kieu query lay theo ma >= 2
+        Cursor cursor = database.query("Contact",null,"Ma>=?",new String[]{"2"},null,null,null);
         contactArrayAdapter.clear();
         while (cursor.moveToNext()){
             int ma = cursor.getInt(0);
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 myOutPut.close();
                 myInput.close();
             }
-            else {
+            else if (!f.exists()){
                 Toast.makeText(this, "File không tồn tại", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "copyDatabaseFromAsset: Load file lên");
                 f.mkdir();
